@@ -1,6 +1,6 @@
 import Search from "./components/Search";
 import { useEffect, useState } from "react";
-import Movie from "./components/Movie";
+import MovieCard from "./components/MovieCard";
 import Spinner from "./components/Spinner";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
@@ -30,7 +30,6 @@ export default function App() {
         throw new Error("Failed to fetch movies");
       }
       const data = await response.json();
-      console.log(data);
       if (data.Response === "False") {
         setErrorMessage(data.error || "Failed to fetch movies");
         setMovieList([]);
@@ -70,9 +69,7 @@ export default function App() {
           ) : (
             <ul>
               {movieList.map((movie) => (
-                <li key={movie.id}>
-                  <Movie movie={movie} />
-                </li>
+                <MovieCard key={movie.id} movie={movie} />
               ))}
             </ul>
           )}
