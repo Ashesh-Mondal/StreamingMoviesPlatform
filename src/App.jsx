@@ -3,6 +3,7 @@ import { useDebounce } from "react-use";
 import Search from "./components/Search";
 import MovieCard from "./components/MovieCard";
 import Spinner from "./components/Spinner";
+import { updateSearchCount } from "./appwrite";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 
@@ -23,6 +24,8 @@ export default function App() {
   const [isLoding, setIsLoding] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
+  // Debounce the search term to prevent making too many API requests
+  // by waiting for the user to stop typing for 500ms
   useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm]);
 
   const fetchMovies = async (query = "") => {
@@ -34,7 +37,6 @@ export default function App() {
           )}&include_adult=false&language=en-US&page=1`
         : `${API_BASE_URL}/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc`;
       const response = await fetch(endpoint, API_OPTIONS);
-      console.log(response);
       if (!response.ok) {
         throw new Error("Failed to fetch movies");
       }
@@ -45,6 +47,9 @@ export default function App() {
         return;
       }
       setMovieList(data.results);
+      if (query && data.results.length > 0) {
+        await updateSearchCount(query, data.results[0]);
+      }
     } catch (err) {
       console.log(`Error while fetching the movies: ${err}`);
       setErrorMessage("Error fetching movies. Please try again.");
